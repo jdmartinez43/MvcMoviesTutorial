@@ -3,6 +3,7 @@
 ## Getting Started
 ### Requirements (VS Code Environment)
 - VS Code with ASP.NET 7.0 
+- Tutorial Videos: https://www.youtube.com/playlist?list=PLdo4fOcmZ0oXCPdC3fTFA3Z79-eVH3K-s
 
 Create Web app 
 ```
@@ -79,3 +80,28 @@ idk i have to read this over again but its to make it easier to keep components 
 ### Strongly typed models and the @model directive
 The ViewData dictionary is used so controllers can pass data or objects to a View. Within View files, the @model is used to specify the expected object we want. In the `/Views/Movies/Details.cshtml`, we see the `@model MvcMovie.Models.Movie` to declare that the `model` object in this file is expected to behave using data from the Movie POCO.  
 To enumerate over Model objects, Use the `IEnumerable<ModelName>`. An example of this in use with a for loop is in the Index.cshtml file 
+
+## Databases in an ASP.NET Core MVC app
+Link: https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/working-with-sql?view=aspnetcore-7.0
+The project's Context file handles connecting to the database within the `Program.cs` file.
+To learn more about connections, learn here https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-7.0
+
+### SQLite
+For managing and viewing sqlite db's: https://sqlitebrowser.org/
+Notes:
+- SQLite allows adding a column but not removing and changing a column; migrations created to remove or change a column succeed but updates fail. To rebuild a table, you must:
+- Creating a new table.
+- Copying data from the old table to the new table.
+- Dropping the old table.
+- Renaming the new table.
+
+ASP.NET Core reads the `ConnectionString` from the `appsettings.json` file to find the sqlite database file to work with. Working with database's involving the Entity Framework involves using DbContext (your context class) to interact with your Model's. For Reference: https://learn.microsoft.com/en-us/ef/ef6/fundamentals/working-with-dbcontext.
+
+### Seed database
+View `SeedData.cs` in the Models folder to see how to populate database's. 
+
+### Drop database
+View `DeleteData.cs` in the models folder to drop all records stored in the database
+
+## Controllers and Views in ASP.NET Core
+https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/controller-methods-views?view=aspnetcore-7.0
