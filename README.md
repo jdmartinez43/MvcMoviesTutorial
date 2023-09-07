@@ -105,3 +105,33 @@ View `DeleteData.cs` in the models folder to drop all records stored in the data
 
 ## Controllers and Views in ASP.NET Core
 https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/controller-methods-views?view=aspnetcore-7.0
+
+DataTypes and DataAnnotations are important to make sure we are interacting with data in the Model properly. Learn more here https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties?tabs=data-annotations%2Cwithout-nrt#column-data-types
+
+In the Movie.cs file, we see the Price property is configured to have precision of 14 and scale 2 for the Decimal DataType. 
+
+## MoviesController.cs
+
+[Tag helpers](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/tag-helpers/intro?view=aspnetcore-7.0) let the server side code create and render html elements in Razor file dynamically. In this Movies project, we see how it is used for the `Edit`, `Details`, and `Delete` functionality, which works thanks to the pattern matching we defined in the `Program.cs`.
+
+[Bind Attribute](https://learn.microsoft.com/en-us/aspnet/mvc/overview/getting-started/getting-started-with-ef-using-mvc/implementing-basic-crud-functionality-with-the-entity-framework-in-asp-net-mvc-application#overpost) is used to protext agianst overposting. We only include properties with the Bind attribute that we want to change
+
+Http methods have their own attributes to let us know if we want to make a GET, POST, etc request. By default functions use [HttpGet]. Ideally we try to follow REST patterns, such as not modifying the application during a GET Request
+
+## Search Functionality
+https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/search?view=aspnetcore-7.0
+Read over the `Index` functions over how to create search queries within the `MoviesController.cs` 
+
+### Linq
+(Language Level Querying)[https://learn.microsoft.com/en-us/dotnet/standard/linq/] can be used with C# to access data. In the Index within the `MoviesController.cs` file, we define a query to search the database. The query contains a lambda expression to limit the data we want to obtain. One notable thing about the query is that LINQ queries don't run when they are __defined__, but when they are __called__. We receive the results after the value is iterated over or when we call the `ToListAsync()` function.
+
+## Views
+The `DisplayNameFor` HTML Helper inspects the `Title` property referenced in the lambda expression to determine the display name. Since the lambda expression is inspected rather than evaluated, you don't receive an access violation when `model`, `model.Movies`, or `model.Movies[0]` are `null` or empty. When the lambda expression is evaluated (for example, `@Html.DisplayFor(modelItem => item.Title)`), the model's property values are evaluated. 
+
+The `!` after `model.Movies` is the null-forgiving operator, which is used to declare that Movies isn't null. It's a postfix operator used to supress all nullable warnings. It only affects compiler's static flow analysis by changing the null state of the expression. The expression `x!` evaluates to the result of the underlying expression `x`. By using the null-forgiving operator, you inform the compiler that passing null is expected and shouldn't be warned about.
+
+## [Add a new field to an ASP.NET Core MVC app](https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/new-field?view=aspnetcore-7.0&tabs=visual-studio)
+
+We use the Entity Framework Code First Migrations in this section to:
+- Add a new field to the model
+- Migrate a new field to the database 

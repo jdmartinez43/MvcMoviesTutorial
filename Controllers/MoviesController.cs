@@ -19,13 +19,79 @@ namespace MvcMovie.Controllers
             _context = context;
         }
 
-        // GET: Movies
-        public async Task<IActionResult> Index()
+        // creates search query to find a movie with a specific title 
+        // uses query string values for parameters
+        // // GET: Movies
+        public async Task<IActionResult> Index(string movieGenre, string searchString)
         {
-              return _context.Movie != null ? 
-                          View(await _context.Movie.ToListAsync()) :
-                          Problem("Entity set 'MvcMovieContext.Movie'  is null.");
+            if ( _context.Movie == null)
+            {
+                return Problem("Entity set 'MvcMovieContext.Movie' is null");
+            }
+
+            // Uses LINQ to get list of genres
+            // SelectList of genres is created by projecting the distinct genres
+            // we don't want to duplicate genres
+            IQueryable<string> genreQuery = from m in _context.Movie
+                                            orderby m.Genre
+                                            select m.Genre;
+
+            var movies = from m in _context.Movie 
+                        select m;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                movies = movies.Where(s => s.Title!.Contains(searchString));
+            }
+
+            if (!string.IsNullOrEmpty(movieGenre))
+            {
+                movies = movies.Where(s => s.Genre == movieGenre);
+            }
+
+            var movieGenreVM = new MovieGenreViewModel
+            {
+                Genres = new SelectList(await genreQuery.Distinct().ToListAsync()),
+                Movies = await movies.ToListAsync()
+            };
+
+            return View(movieGenreVM);
         }
+
+        // searches for movies based on the string id
+        // since we defined a valid url pattern with the id parameter in the Program.cs,
+        // we can use it as route data within URL's 
+        // example: GET Movies/index/Ghost
+        // public async Task<IActionResult> Index(string id)
+        // {
+        //     if (_context.Movie == null)
+        //     {
+        //         return Problem("Entity set 'MvcMovieContext.Movie'  is null.");
+        //     }
+
+        //     var movies = from m in _context.Movie
+        //                 select m;
+
+        //     if (!String.IsNullOrEmpty(id))
+        //     {
+        //         movies = movies.Where(s => s.Title!.Contains(id));
+        //     }
+
+        //     return View(await movies.ToListAsync());
+        // }
+
+        
+        
+        // This function that attempts to retrieve filtered data with a 
+        // POST Request has side effects, where there is no search information
+        // contained in the URL. The searchString value is passed as a form field value
+        // meaning that search parameters are not passed in the URL. This means you could
+        // not share the URL with others, but this is possible with HttpGet requests 
+        // [HttpPost]
+        // public string Index(string searchString, bool notUsed)
+        // {
+        //     return "From [HttpPost]Index: filter on " + searchString;
+        // }
 
         // GET: Movies/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -68,6 +134,7 @@ namespace MvcMovie.Controllers
         }
 
         // GET: Movies/Edit/5
+        // fetches the movie and populates the edit form genereated by the Edit.cshtml
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Movie == null)
@@ -84,6 +151,7 @@ namespace MvcMovie.Controllers
         }
 
         // POST: Movies/Edit/5
+        // Processes posted movies values
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -95,6 +163,7 @@ namespace MvcMovie.Controllers
                 return NotFound();
             }
 
+            // ensures that the data submitted in form's post request can modify a Movie Object
             if (ModelState.IsValid)
             {
                 try
