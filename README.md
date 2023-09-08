@@ -135,3 +135,28 @@ The `!` after `model.Movies` is the null-forgiving operator, which is used to de
 We use the Entity Framework Code First Migrations in this section to:
 - Add a new field to the model
 - Migrate a new field to the database 
+
+When we update any of the Models within the `Models/` directory, we need to rebuild the project which we can do with `dotnet build`. You also need to update the property binding list. This can be done by updating the `[Bind]` attribute for both the `Create` and `Edit` action methods like so 
+```[Bind("Id,Title,ReleaseDate,Genre,Price,Rating")]```
+
+We need to update our views to contain the Rating attribute. These changes are shown in the `Views/Movies/` files. We also must update our seed Data to contain Rating values.
+
+One important thing we must do is modify our database schema since we have no added a new Rating feature. Some ways to fix this include:
+
+1. Have the Entity Framework automatically drop and re-create the database based on the new model class schema. This approach is very convenient early in the development cycle when you're doing active development on a test database; it allows you to quickly evolve the model and database schema together. The downside, though, is that you lose existing data in the database — so you don't want to use this approach on a production database! Using an initializer to automatically seed a database with test data is often a productive way to develop an application. This is a good approach for early development and when using SQLite.
+
+2. Explicitly modify the schema of the existing database so that it matches the model classes. The advantage of this approach is that you keep your data. You can make this change either manually or by creating a database change script.
+
+3. Use Code First Migrations to update the database schema. We will use this option. 
+
+Delete the Migrations folder and the .db file. Then run the following commands:
+```
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+``` 
+
+To learn more about resetting migrations visit [here](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing?tabs=dotnet-core-cli#resetting-all-migrations) 
+
+
+
+
