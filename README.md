@@ -158,5 +158,42 @@ dotnet ef database update
 To learn more about resetting migrations visit [here](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing?tabs=dotnet-core-cli#resetting-all-migrations) 
 
 
+## [Validation](https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/validation?view=aspnetcore-7.0)
+
+Core part of MVC is DRY - Dont Repeat Yourself
+
+We can add Validation Rules to the Model by using Data Annotations to specify Data Types, formatting, etc. Our updates are shown in the `Movie.cs` file.
+
+A significant benefit is that we didn't need to change a single line of code in the `MoviesController` class or in the `Create.cshtml` view in order to enable this validation UI. The controller and views you created earlier in this tutorial automatically picked up the validation rules that you specified by using validation attributes on the properties of the `Movie` model class. Test validation using the `Edit` action method, and the same validation is applied.
+
+### How Validation Works
+In the `MoviesController.cs` file, we see two Create functions: one for GET and POST requests. The HttpPost version calls ModelState.IsValid to check for any validation errors in the form. If it fails, it re-displays the form as there was a client-side error (meaning the requestee made a faulty request). If it succeeds, we add the movie into the database and redirects to the proper Index path. If you disable JavaScript in your browser, client-side validation is disabled. You can verify this by testing the HTTP Post `Create` method and stepping through the debugger how validation still works. The Create request redirects back to itself, as Validation rules applied within the `Movie.cs` are applied. This follows the DRY principle since we only need to worry about our logic on one place for it to be used everywhere, reducing redundancy. 
+
+What's really nice about this approach is that neither the controller nor the Create view template knows anything about the actual validation rules being enforced or about the specific error messages displayed. The validation rules and the error strings are specified only in the Movie class. These same validation rules are automatically applied to the Edit view and any other views templates you might create that edit your model.
+
+### DataType Attributes
+DataAnnotations provide formatting attributes a built-in set of validation attributes. We see examples with the DataType.Date and DataType.Currency validations for ReleaseDate and Price, respectively.
+
+The ApplyFormatInEditMode setting specifies that the formatting should also be applied when the value is displayed in a text box for editing. (You might not want that for some fields — for example, for currency values, you probably don't want the currency symbol in the text box for editing.)
+
+## [Details and Delete methods of an ASP.NET Core app](https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/details?view=aspnetcore-7.0)
+
+### Details
+The MVC scaffolding engine adds a comment with an example request for using this method. The URL contains 3 segments, the `Movies` controller, the `Details` method, and an `id` value. These segments are defined in the `Program.cs` file. 
+
+Entity Framework makes it easy to search for data using the `FirstOfDefaultAsync` method. It verifies that a movie can be found before any operations are done. For example, a hacker could introduce errors into the site by changing the URL created by the links from `http://localhost:{PORT}/Movies/Details/1` to something like `http://localhost:{PORT}/Movies/Details/12345` (or some other value that doesn't represent an actual movie). If you didn't check for a null movie, the app would throw an exception. 
+
+### Delete
+There are 2 functions for Deletion, A GET `Delete` and a DELETE `DeleteConfirmed`. The GET function returns a view of the movie where you can submit data for a deletion.  Performing a delete operation in response to a GET request (or for that matter, performing an edit operation, create operation, or any other operation that changes data) opens up a __security hole__.
+
+The common language runtime (CLR) requires overloaded methods to havea unique parameter signature(meaning same method name, diff parameters). However, here we have two delete methods (one for GET and POST each) that accept a single integer as a parameter. There are 2 approaches to fixing this problem:
+-  We can give the methods different names (as the scaffolding mechanism did). However, this makes a small problem: ASP.NET maps segments of a URL to action methods by name, so if you rename a method, routing normally wouldn't be able to find the method. To remedy this, we add the `ActionName("Delete")` attribute to the `DeleteConfirmed` method. So that the mapping for the routing system will find the `DeleteConfirmed` method under the `Delete` action. 
+- We can also artificially change the POST method's signature to include an extra (unused) parameter, resulting in a method signature like: 
+```c#
+// POST: Movies/Delete/6
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Delete(int id, bool notUsed)
+```
 
 
